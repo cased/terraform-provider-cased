@@ -26,6 +26,15 @@ $ go install
 ### Creating workflows workflow
 
 ```tf
+terraform {
+  required_providers {
+    cased = {
+      source = "cased/cased"
+      version = "0.0.1-beta"
+    }
+  }
+}
+
 provider "cased" {
   # Grab your Workflow API key from the API keys page:
   # https://app.cased.com/settings/api-keys
