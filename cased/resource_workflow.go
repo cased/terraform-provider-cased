@@ -295,16 +295,19 @@ func flattenWorkflowControls(controls workflows.Controls) []interface{} {
 			}
 		}
 
-		control["approval"] = []interface{}{
-			map[string]interface{}{
-				"count":         controls.Approval.Count,
-				"self_approval": controls.Approval.SelfApproval,
-				"duration":      controls.Approval.Duration,
-				"timeout":       controls.Approval.Timeout,
-				"responders":    responders,
-				"sources":       []interface{}{sources},
-			},
+		approval := map[string]interface{}{
+			"count":         controls.Approval.Count,
+			"self_approval": controls.Approval.SelfApproval,
+			"duration":      controls.Approval.Duration,
+			"timeout":       controls.Approval.Timeout,
+			"responders":    responders,
 		}
+
+		if len(sources) > 0 {
+			approval["sources"] = []interface{}{sources}
+		}
+
+		control["approval"] = []interface{}{approval}
 	}
 
 	return []interface{}{control}
