@@ -5,6 +5,7 @@ A Terraform provider for managing resources on your Cased account.
 Currently, this provider supports:
 
 - Managing workflows
+- Managing webhooks
 
 ## Requirements
 
