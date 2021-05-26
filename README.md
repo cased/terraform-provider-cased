@@ -41,6 +41,18 @@ provider "cased" {
   workflows_api_key = ""
 }
 
+resource "cased_webhooks_endpoint" "webhook-endpoint" {
+  url = "https://app.cased.com/webhooks/endpoint"
+
+  // event_types is optional, subscribed to all event types of left blank
+  event_types = ["event.created"]
+}
+
+// The webhook secret is accessible so you can set environment variables
+output "cased_webhooks_endpoint_secret" {
+  value = cased_webhooks_endpoint.webhook-endpoint.secret
+}
+
 resource "cased_workflow" "database-provisioning" {
   name = "database-provisioning"
 
