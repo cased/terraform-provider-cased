@@ -59,6 +59,14 @@ github.com/aws/aws-sdk-go v1.15.78/go.mod h1:E3/ieXAlvM0XWO57iftYVDLLvQ824smPP3A
 github.com/aws/aws-sdk-go v1.25.3/go.mod h1:KmX6BPdI08NWTb3/sm4ZGu5ShLoqVDhKgpiN924inxo=
 github.com/bgentry/go-netrc v0.0.0-20140422174119-9fd32a8b3d3d/go.mod h1:6QX/PXZ00z/TKoufEY6K/a0k6AhaJrQKdFe6OfVXsa4=
 github.com/bgentry/speakeasy v0.1.0/go.mod h1:+zsyZBPWlz7T6j88CTgSN5bM796AkVf0kBD4zp0CCIs=
+github.com/cased/cased-go v1.0.0 h1:nEWmidRJLKUgPIzNj7YbDJ3TN5t1CPm/Xyabs/0c4kw=
+github.com/cased/cased-go v1.0.0/go.mod h1:ycyzk9B574kc7XGS6UhhlfTD19Q3D23N3irNe+LQ++A=
+github.com/cased/cased-go v1.0.1-0.20210525223526-e66aec322479 h1:NpMvKZLQn+C8JguwkO3DhKq0lhzWWgQz4dg8ub3bhfI=
+github.com/cased/cased-go v1.0.1-0.20210525223526-e66aec322479/go.mod h1:ycyzk9B574kc7XGS6UhhlfTD19Q3D23N3irNe+LQ++A=
+github.com/cased/cased-go v1.0.1-0.20210525232359-6c1704eca53b h1:/luQ0FtjW5MsB6U3adUJKjMEb63uVExe3k7MUtQBRC4=
+github.com/cased/cased-go v1.0.1-0.20210525232359-6c1704eca53b/go.mod h1:ycyzk9B574kc7XGS6UhhlfTD19Q3D23N3irNe+LQ++A=
+github.com/cased/cased-go v1.0.1-0.20210526002640-f82439ac092c h1:S72uHilg1s5kX465Xu3MqIkjyxKU9CDeJgwK6572H0Y=
+github.com/cased/cased-go v1.0.1-0.20210526002640-f82439ac092c/go.mod h1:ycyzk9B574kc7XGS6UhhlfTD19Q3D23N3irNe+LQ++A=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cheggaaa/pb v1.0.27/go.mod h1:pQciLPpbU0oxA0h+VJYYLxO+XeDQb5pZijXscXHm81s=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
@@ -70,6 +78,8 @@ github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ3
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/dewski/jsonpath v0.0.0-20210103075638-af6da8f1a897 h1:ry3d3QiAwu3vz1i9XIjgsg310jpt4mLAYyDVc8oWSMs=
+github.com/dewski/jsonpath v0.0.0-20210103075638-af6da8f1a897/go.mod h1:kR1CX3jQ2R/XHk+Lm1tHx7F1xhKlwCy2tMtS7jDUqtc=
 github.com/emirpasic/gods v1.12.0/go.mod h1:YfzfFFoVP/catgzJb4IKIqXjX78Ha8FMSDh3ymbK86o=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
@@ -189,6 +199,8 @@ github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8/go.mod h1:Nht
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
 github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/XSXhF0NWZEnDohbsk=
+github.com/kelseyhightower/envconfig v1.4.0 h1:Im6hONhd3pLkfDFsbRgu68RDNkGF1r3dvMUtDTo2cv8=
+github.com/kelseyhightower/envconfig v1.4.0/go.mod h1:cccZRl6mQpaq41TPp5QxidR+Sa3axMbJDNb//FQX6Gg=
 github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351/go.mod h1:CT57kijsi8u/K/BOFA39wgDQJ9CxiF4nAY/ojJ6r6mM=
 github.com/keybase/go-crypto v0.0.0-20161004153544-93f5b35093ba/go.mod h1:ghbZscTyKdM07+Fw3KSi0hcJm+AlEUWj8QLlPtijN/M=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=

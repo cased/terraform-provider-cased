@@ -2,8 +2,10 @@ package cased
 
 import (
 	"context"
-	"terraform-provider-cased/workflows"
+	"time"
 
+	"github.com/cased/cased-go"
+	"github.com/cased/cased-go/workflow"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -152,54 +154,52 @@ func resourceWorkflow() *schema.Resource {
 }
 
 func resourceWorkflowCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*workflows.Client)
-
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	workflow, err := c.CreateWorkflow(buildWorkflow(d, diags))
+	w, err := workflow.New(buildWorkflowParams(d, diags))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(workflow.ID)
+	d.SetId(w.ID)
 
 	return diags
 }
 
 func resourceWorkflowRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*workflows.Client)
-
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	workflow, err := c.GetWorkflow(d.Id())
+	w, err := workflow.Get(d.Id())
 	if err != nil {
-		if err == workflows.ErrNotFound {
-			d.SetId("")
-			return diags
+		if casedErr, ok := err.(*cased.Error); ok {
+			if casedErr.Code == cased.ErrorCodeNotFound {
+				d.SetId("")
+				return diags
+			}
 		}
 
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("name", workflow.Name); err != nil {
+	if err := d.Set("name", w.Name); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("conditions", flattenWorkflowConditions(workflow.Conditions)); err != nil {
+	if err := d.Set("conditions", flattenWorkflowConditions(w.Conditions)); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("controls", flattenWorkflowControls(workflow.Controls)); err != nil {
+	if err := d.Set("controls", flattenWorkflowControls(w.Controls)); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("updated_at", workflow.UpdatedAt); err != nil {
+	if err := d.Set("updated_at", w.UpdatedAt.Format(time.RFC3339Nano)); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("created_at", workflow.CreatedAt); err != nil {
+	if err := d.Set("created_at", w.CreatedAt.Format(time.RFC3339Nano)); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -207,12 +207,10 @@ func resourceWorkflowRead(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceWorkflowUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*workflows.Client)
-
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	_, err := c.UpdateWorkflow(buildWorkflow(d, diags))
+	_, err := workflow.Update(d.Id(), buildWorkflowParams(d, diags))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -221,15 +219,15 @@ func resourceWorkflowUpdate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func resourceWorkflowDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*workflows.Client)
-
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	_, err := c.DeleteWorkflow(d.Id())
+	_, err := workflow.Delete(d.Id())
 	if err != nil {
-		if err == workflows.ErrNotFound {
-			return diags
+		if casedErr, ok := err.(*cased.Error); ok {
+			if casedErr.Code == cased.ErrorCodeNotFound {
+				return diags
+			}
 		}
 
 		return diag.FromErr(err)
@@ -238,8 +236,8 @@ func resourceWorkflowDelete(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
-func flattenWorkflowConditions(conditions []workflows.Condition) []interface{} {
-	cs := make([]interface{}, len(conditions), len(conditions))
+func flattenWorkflowConditions(conditions []cased.WorkflowCondition) []interface{} {
+	cs := make([]interface{}, len(conditions))
 
 	for i, condition := range conditions {
 		c := make(map[string]interface{})
@@ -254,14 +252,14 @@ func flattenWorkflowConditions(conditions []workflows.Condition) []interface{} {
 	return cs
 }
 
-func flattenWorkflowControls(controls workflows.Controls) []interface{} {
+func flattenWorkflowControls(controls cased.WorkflowControls) []interface{} {
 	control := map[string]interface{}{}
 
-	if controls.Authentication {
+	if controls.Authentication != nil && *controls.Authentication {
 		control["authentication"] = true
 	}
 
-	if controls.Reason {
+	if controls.Reason != nil && *controls.Reason {
 		control["reason"] = true
 	}
 
@@ -313,54 +311,54 @@ func flattenWorkflowControls(controls workflows.Controls) []interface{} {
 	return []interface{}{control}
 }
 
-func buildWorkflow(d *schema.ResourceData, diags diag.Diagnostics) workflows.Workflow {
+func buildWorkflowParams(d *schema.ResourceData, diags diag.Diagnostics) *cased.WorkflowParams {
 	conditionsConfig := d.Get("conditions").([]interface{})
 	controlsConfig := d.Get("controls").([]interface{})
 	name := d.Get("name").(string)
-	conditions := []workflows.Condition{}
-	controls := workflows.Controls{}
+	conditions := []*cased.WorkflowConditionParams{}
+	controls := &cased.WorkflowControlsParams{}
 
 	for _, control := range controlsConfig {
 		c := control.(map[string]interface{})
 
 		if val, ok := c["authentication"].(bool); ok {
-			controls.Authentication = val
+			controls.Authentication = cased.Bool(val)
 		}
 
 		if val, ok := c["reason"].(bool); ok {
-			controls.Reason = val
+			controls.Reason = cased.Bool(val)
 		}
 
 		if approvals, ok := c["approval"].([]interface{}); ok {
 			if controls.Approval == nil {
-				controls.Approval = &workflows.ApprovalControl{}
+				controls.Approval = &cased.WorkflowControlsApprovalParams{}
 			}
 
 			for _, approval := range approvals {
 				a := approval.(map[string]interface{})
 
 				if count, ok := a["reason"].(int); ok {
-					controls.Approval.Count = count
+					controls.Approval.Count = cased.Int(count)
 				}
 
 				if selfApproval, ok := a["self_approval"].(bool); ok {
-					controls.Approval.SelfApproval = selfApproval
+					controls.Approval.SelfApproval = cased.Bool(selfApproval)
 				}
 
 				if count, ok := a["count"].(int); ok {
-					controls.Approval.Count = count
+					controls.Approval.Count = cased.Int(count)
 				}
 
-				if duration, ok := a["duration"].(int); ok {
-					controls.Approval.Duration = duration
+				if duration, ok := a["duration"].(int); ok && duration != 0 {
+					controls.Approval.Duration = cased.Int(duration)
 				}
 
-				if timeout, ok := a["timeout"].(int); ok {
-					controls.Approval.Timeout = timeout
+				if timeout, ok := a["timeout"].(int); ok && timeout != 0 {
+					controls.Approval.Timeout = cased.Int(timeout)
 				}
 
 				if responders, ok := a["responders"].([]interface{}); ok {
-					table := workflows.Responders{}
+					table := cased.WorkflowControlsApprovalResponders{}
 
 					for _, responder := range responders {
 						r := responder.(map[string]interface{})
@@ -387,26 +385,26 @@ func buildWorkflow(d *schema.ResourceData, diags diag.Diagnostics) workflows.Wor
 
 				if sources, ok := a["sources"].([]interface{}); ok {
 					if controls.Approval.Sources == nil {
-						controls.Approval.Sources = &workflows.ApprovalControlSources{}
+						controls.Approval.Sources = &cased.WorkflowControlsApprovalSourcesParams{}
 					}
 
 					for _, source := range sources {
 						s := source.(map[string]interface{})
 
 						if email, ok := s["email"].(bool); ok {
-							controls.Approval.Sources.Email = email
+							controls.Approval.Sources.Email = cased.Bool(email)
 						}
 
 						if slacks, ok := s["slack"].([]interface{}); ok {
 							if controls.Approval.Sources.Slack == nil {
-								controls.Approval.Sources.Slack = &workflows.ApprovalControlSourceSlack{}
+								controls.Approval.Sources.Slack = &cased.WorkflowControlsApprovalSourcesSlackParams{}
 							}
 
 							for _, slack := range slacks {
 								sc := slack.(map[string]interface{})
 
 								if channel, ok := sc["channel"].(string); ok {
-									controls.Approval.Sources.Slack.Channel = channel
+									controls.Approval.Sources.Slack.Channel = cased.String(channel)
 								}
 							}
 						}
@@ -419,16 +417,15 @@ func buildWorkflow(d *schema.ResourceData, diags diag.Diagnostics) workflows.Wor
 	for _, condition := range conditionsConfig {
 		c := condition.(map[string]interface{})
 
-		conditions = append(conditions, workflows.Condition{
-			Field:    c["field"].(string),
-			Value:    c["value"].(string),
-			Operator: c["operator"].(string),
+		conditions = append(conditions, &cased.WorkflowConditionParams{
+			Field:    cased.String(c["field"].(string)),
+			Value:    cased.String(c["value"].(string)),
+			Operator: cased.String(c["operator"].(string)),
 		})
 	}
 
-	return workflows.Workflow{
-		ID:         d.Id(),
-		Name:       name,
+	return &cased.WorkflowParams{
+		Name:       cased.String(name),
 		Conditions: conditions,
 		Controls:   controls,
 	}
