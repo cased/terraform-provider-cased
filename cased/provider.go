@@ -2,8 +2,8 @@ package cased
 
 import (
 	"context"
-	"terraform-provider-cased/workflows"
 
+	"github.com/cased/cased-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -24,7 +24,8 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"cased_workflow": resourceWorkflow(),
+			"cased_workflow":          resourceWorkflow(),
+			"cased_webhooks_endpoint": resourceWebhooksEndpoint(),
 		},
 		DataSourcesMap:       map[string]*schema.Resource{},
 		ConfigureContextFunc: providerConfigure,
@@ -38,10 +39,12 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	// Warning or errors can be collected in a slice type
 	var diags diag.Diagnostics
 
-	c, err := workflows.NewClient(apiURL, workflowsApiKey)
-	if err != nil {
-		return nil, diag.FromErr(err)
-	}
+	endpoint := cased.GetEndpointWithConfig(cased.WorkflowsEndpoint, &cased.EndpointConfig{
+		URL:    cased.String(apiURL),
+		APIKey: cased.String(workflowsApiKey),
+	})
 
-	return c, diags
+	cased.SetEndpoint(cased.WorkflowsEndpoint, endpoint)
+
+	return endpoint, diags
 }
