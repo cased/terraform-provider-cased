@@ -135,16 +135,21 @@ func resourceWebhooksEndpointDelete(ctx context.Context, d *schema.ResourceData,
 }
 
 func buildWebhooksEndpointParams(d *schema.ResourceData, diags diag.Diagnostics) *cased.WebhooksEndpointParams {
-	url := d.Get("url").(string)
-	eventTypesSet := d.Get("event_types").(*schema.Set)
-	eventTypes := []*string{}
-
-	for _, v := range eventTypesSet.List() {
-		eventTypes = append(eventTypes, cased.String(v.(string)))
+	params := &cased.WebhooksEndpointParams{}
+	if ok := d.HasChange("url"); ok {
+		params.URL = cased.String(d.Get("url").(string))
 	}
 
-	return &cased.WebhooksEndpointParams{
-		URL:        cased.String(url),
-		EventTypes: eventTypes,
+	if ok := d.HasChange("event_types"); ok {
+		eventTypesSet := d.Get("event_types").(*schema.Set)
+		eventTypes := []string{}
+
+		for _, v := range eventTypesSet.List() {
+			eventTypes = append(eventTypes, v.(string))
+		}
+
+		params.EventTypes = &eventTypes
 	}
+
+	return params
 }

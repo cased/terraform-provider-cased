@@ -312,121 +312,129 @@ func flattenWorkflowControls(controls cased.WorkflowControls) []interface{} {
 }
 
 func buildWorkflowParams(d *schema.ResourceData, diags diag.Diagnostics) *cased.WorkflowParams {
-	conditionsConfig := d.Get("conditions").([]interface{})
-	controlsConfig := d.Get("controls").([]interface{})
-	name := d.Get("name").(string)
-	conditions := []*cased.WorkflowConditionParams{}
-	controls := &cased.WorkflowControlsParams{}
+	params := &cased.WorkflowParams{}
 
-	for _, control := range controlsConfig {
-		c := control.(map[string]interface{})
+	if ok := d.HasChange("controls"); ok {
+		controlsConfig := d.Get("controls").([]interface{})
+		controls := &cased.WorkflowControlsParams{}
+		for _, control := range controlsConfig {
+			c := control.(map[string]interface{})
 
-		if val, ok := c["authentication"].(bool); ok {
-			controls.Authentication = cased.Bool(val)
-		}
-
-		if val, ok := c["reason"].(bool); ok {
-			controls.Reason = cased.Bool(val)
-		}
-
-		if approvals, ok := c["approval"].([]interface{}); ok {
-			if controls.Approval == nil {
-				controls.Approval = &cased.WorkflowControlsApprovalParams{}
+			if val, ok := c["authentication"].(bool); ok {
+				controls.Authentication = cased.Bool(val)
 			}
 
-			for _, approval := range approvals {
-				a := approval.(map[string]interface{})
+			if val, ok := c["reason"].(bool); ok {
+				controls.Reason = cased.Bool(val)
+			}
 
-				if count, ok := a["reason"].(int); ok {
-					controls.Approval.Count = cased.Int(count)
+			if approvals, ok := c["approval"].([]interface{}); ok {
+				if controls.Approval == nil {
+					controls.Approval = &cased.WorkflowControlsApprovalParams{}
 				}
 
-				if selfApproval, ok := a["self_approval"].(bool); ok {
-					controls.Approval.SelfApproval = cased.Bool(selfApproval)
-				}
+				for _, approval := range approvals {
+					a := approval.(map[string]interface{})
 
-				if count, ok := a["count"].(int); ok {
-					controls.Approval.Count = cased.Int(count)
-				}
+					if count, ok := a["reason"].(int); ok {
+						controls.Approval.Count = cased.Int(count)
+					}
 
-				if duration, ok := a["duration"].(int); ok && duration != 0 {
-					controls.Approval.Duration = cased.Int(duration)
-				}
+					if selfApproval, ok := a["self_approval"].(bool); ok {
+						controls.Approval.SelfApproval = cased.Bool(selfApproval)
+					}
 
-				if timeout, ok := a["timeout"].(int); ok && timeout != 0 {
-					controls.Approval.Timeout = cased.Int(timeout)
-				}
+					if count, ok := a["count"].(int); ok {
+						controls.Approval.Count = cased.Int(count)
+					}
 
-				if responders, ok := a["responders"].([]interface{}); ok {
-					table := cased.WorkflowControlsApprovalResponders{}
+					if duration, ok := a["duration"].(int); ok && duration != 0 {
+						controls.Approval.Duration = cased.Int(duration)
+					}
 
-					for _, responder := range responders {
-						r := responder.(map[string]interface{})
+					if timeout, ok := a["timeout"].(int); ok && timeout != 0 {
+						controls.Approval.Timeout = cased.Int(timeout)
+					}
 
-						if resp, ok := r["responder"].([]interface{}); ok {
-							for _, res := range resp {
-								rc := res.(map[string]interface{})
+					if responders, ok := a["responders"].([]interface{}); ok {
+						table := cased.WorkflowControlsApprovalResponders{}
 
-								required := rc["required"].(bool)
+						for _, responder := range responders {
+							r := responder.(map[string]interface{})
 
-								if name, ok := rc["name"].(string); ok {
-									if required {
-										table[name] = "required"
-									} else {
-										table[name] = "optional"
+							if resp, ok := r["responder"].([]interface{}); ok {
+								for _, res := range resp {
+									rc := res.(map[string]interface{})
+
+									required := rc["required"].(bool)
+
+									if name, ok := rc["name"].(string); ok {
+										if required {
+											table[name] = "required"
+										} else {
+											table[name] = "optional"
+										}
+									}
+								}
+							}
+						}
+
+						controls.Approval.Responders = &table
+					}
+
+					if sources, ok := a["sources"].([]interface{}); ok {
+						if controls.Approval.Sources == nil {
+							controls.Approval.Sources = &cased.WorkflowControlsApprovalSourcesParams{}
+						}
+
+						for _, source := range sources {
+							s := source.(map[string]interface{})
+
+							if email, ok := s["email"].(bool); ok {
+								controls.Approval.Sources.Email = cased.Bool(email)
+							}
+
+							if slacks, ok := s["slack"].([]interface{}); ok {
+								if controls.Approval.Sources.Slack == nil {
+									controls.Approval.Sources.Slack = &cased.WorkflowControlsApprovalSourcesSlackParams{}
+								}
+
+								for _, slack := range slacks {
+									sc := slack.(map[string]interface{})
+
+									if channel, ok := sc["channel"].(string); ok {
+										controls.Approval.Sources.Slack.Channel = cased.String(channel)
 									}
 								}
 							}
 						}
 					}
-
-					controls.Approval.Responders = &table
-				}
-
-				if sources, ok := a["sources"].([]interface{}); ok {
-					if controls.Approval.Sources == nil {
-						controls.Approval.Sources = &cased.WorkflowControlsApprovalSourcesParams{}
-					}
-
-					for _, source := range sources {
-						s := source.(map[string]interface{})
-
-						if email, ok := s["email"].(bool); ok {
-							controls.Approval.Sources.Email = cased.Bool(email)
-						}
-
-						if slacks, ok := s["slack"].([]interface{}); ok {
-							if controls.Approval.Sources.Slack == nil {
-								controls.Approval.Sources.Slack = &cased.WorkflowControlsApprovalSourcesSlackParams{}
-							}
-
-							for _, slack := range slacks {
-								sc := slack.(map[string]interface{})
-
-								if channel, ok := sc["channel"].(string); ok {
-									controls.Approval.Sources.Slack.Channel = cased.String(channel)
-								}
-							}
-						}
-					}
 				}
 			}
 		}
+
+		params.Controls = controls
 	}
 
-	for _, condition := range conditionsConfig {
-		c := condition.(map[string]interface{})
+	if ok := d.HasChange("conditions"); ok {
+		conditionsConfig := d.Get("conditions").([]interface{})
+		conditions := []cased.WorkflowConditionParams{}
+		for _, condition := range conditionsConfig {
+			c := condition.(map[string]interface{})
 
-		conditions = append(conditions, &cased.WorkflowConditionParams{
-			Field:    cased.String(c["field"].(string)),
-			Value:    cased.String(c["value"].(string)),
-			Operator: cased.String(c["operator"].(string)),
-		})
+			conditions = append(conditions, cased.WorkflowConditionParams{
+				Field:    cased.String(c["field"].(string)),
+				Value:    cased.String(c["value"].(string)),
+				Operator: cased.String(c["operator"].(string)),
+			})
+		}
+
+		params.Conditions = &conditions
 	}
 
-	return &cased.WorkflowParams{
-		Name:       cased.String(name),
-		Conditions: conditions,
-		Controls:   controls,
+	if ok := d.HasChange("name"); ok {
+		params.Name = cased.String(d.Get("name").(string))
 	}
+
+	return params
 }

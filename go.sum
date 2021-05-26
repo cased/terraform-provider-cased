@@ -67,6 +67,8 @@ github.com/cased/cased-go v1.0.1-0.20210525232359-6c1704eca53b h1:/luQ0FtjW5MsB6
 github.com/cased/cased-go v1.0.1-0.20210525232359-6c1704eca53b/go.mod h1:ycyzk9B574kc7XGS6UhhlfTD19Q3D23N3irNe+LQ++A=
 github.com/cased/cased-go v1.0.1-0.20210526002640-f82439ac092c h1:S72uHilg1s5kX465Xu3MqIkjyxKU9CDeJgwK6572H0Y=
 github.com/cased/cased-go v1.0.1-0.20210526002640-f82439ac092c/go.mod h1:ycyzk9B574kc7XGS6UhhlfTD19Q3D23N3irNe+LQ++A=
+github.com/cased/cased-go v1.0.1-0.20210526013807-2efdd1059132 h1:O2FOd492E7z0mAJghDyUC6H6vFKlhM49mhhQb6rIo18=
+github.com/cased/cased-go v1.0.1-0.20210526013807-2efdd1059132/go.mod h1:ycyzk9B574kc7XGS6UhhlfTD19Q3D23N3irNe+LQ++A=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/cheggaaa/pb v1.0.27/go.mod h1:pQciLPpbU0oxA0h+VJYYLxO+XeDQb5pZijXscXHm81s=
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
